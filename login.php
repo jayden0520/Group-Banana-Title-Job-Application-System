@@ -1,16 +1,13 @@
 <?php
-session_start(); // 这一行必须在最上面
-require 'db_connect.php'; // 你的数据库连接
+session_start();
+require 'db_connect.php'; // connect database
 
-// --- 新加的安检门 ---
-// 如果用户已经有 ID 了（说明已登录），直接送去 Dashboard
+// after login will send user to dashboard.php
 if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
     exit();
 }
-// -------------------
 
-// ... 下面才是原本的登录/注册逻辑 ...
 require 'db_connect.php';
 
 $error_msg = "";
@@ -19,21 +16,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // 1. 根据邮箱查找用户
+    // use email to find user
     $sql = "SELECT * FROM users WHERE email = '$email'";
     $result = mysqli_query($conn, $sql);
 
     if (mysqli_num_rows($result) == 1) {
         $row = mysqli_fetch_assoc($result);
         
-        // 2. 验证密码 (将输入的密码与数据库里的哈希密码对比)
+        // check password
         if (password_verify($password, $row['password'])) {
-            // 3. 密码正确，设置 Session 变量
+            // password correct will show session
             $_SESSION['user_id'] = $row['id'];
             $_SESSION['fullname'] = $row['fullname'];
             $_SESSION['email'] = $row['email'];
 
-            // 4. 跳转到 Dashboard
+            // sent to dashbooard.php
             header("Location: dashboard.php");
             exit();
         } else {

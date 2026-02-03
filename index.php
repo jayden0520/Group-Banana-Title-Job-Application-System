@@ -1,27 +1,25 @@
 <?php
-// 1. 开启 Session (为了导航栏)
 session_start();
 
-// 2. 连接数据库 (为了读取职位)
-// 注意：如果还没创建 db_connect.php，记得创建一个
+// connect database
 require 'db_connect.php'; 
 
-// 3. 处理搜索逻辑
-$sql = "SELECT * FROM jobs WHERE 1=1"; // 默认查所有
+// searching jobs from database
+$sql = "SELECT * FROM jobs WHERE 1=1";
 
-// 如果用户搜了关键字
+// select keyword
 if (isset($_GET['keyword']) && !empty($_GET['keyword'])) {
-    $keyword = mysqli_real_escape_string($conn, $_GET['keyword']); // 防止 SQL 注入
+    $keyword = mysqli_real_escape_string($conn, $_GET['keyword']); // prevent SQL injection
     $sql .= " AND title LIKE '%$keyword%'";
 }
 
-// 如果用户选了地点
+// select location
 if (isset($_GET['location']) && !empty($_GET['location'])) {
     $location = mysqli_real_escape_string($conn, $_GET['location']);
     $sql .= " AND location = '$location'";
 }
 
-$sql .= " ORDER BY created_at DESC"; // 按时间倒序，最新的在前
+$sql .= " ORDER BY created_at DESC"; // latest time at front
 $result = mysqli_query($conn, $sql);
 ?>
 
@@ -88,9 +86,9 @@ $result = mysqli_query($conn, $sql);
         <div class="job-list-column">
             
             <?php
-            // 检查是否有工作数据
+            // check if there are results
             if (mysqli_num_rows($result) > 0) {
-                // 有数据：开始循环输出
+                // have data start loop
                 while($row = mysqli_fetch_assoc($result)) {
             ?>
                 <div class="job-card" onclick="showJob('job<?php echo $row['id']; ?>', this)">
@@ -104,9 +102,9 @@ $result = mysqli_query($conn, $sql);
                 </div>
 
             <?php 
-                } // 循环结束
+                }
             } else {
-                // 没数据
+                // if no data
                 echo "<div style='text-align:center; padding:20px;'>No jobs found. Try another search!</div>";
             }
             ?>
@@ -121,7 +119,7 @@ $result = mysqli_query($conn, $sql);
             </div>
 
             <?php
-            // 必须把指针复位，重新循环一次来生成右边的详情块
+            // show detailed job descriptions
             mysqli_data_seek($result, 0);
             if (mysqli_num_rows($result) > 0) {
                 while($row = mysqli_fetch_assoc($result)) {
@@ -133,7 +131,7 @@ $result = mysqli_query($conn, $sql);
                     <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
                     
                     <p><strong>Job Description:</strong></p>
-                    <p><?php echo nl2br($row['description']); // nl2br 让换行符正确显示 ?></p>
+                    <p><?php echo nl2br($row['description']); ?></p>
                     
                     <br>
                     <?php if (isset($_SESSION['user_id'])): ?>

@@ -1,13 +1,12 @@
 <?php
 session_start();
 
-// 安检：如果没有登录，直接踢回 login.php
+// security feature if no login will sent to login.php
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
-// 退出登录逻辑
 if (isset($_GET['logout'])) {
     session_destroy();
     header("Location: login.php");

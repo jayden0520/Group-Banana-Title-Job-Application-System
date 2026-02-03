@@ -1,48 +1,44 @@
 <?php
-session_start(); // 这一行必须在最上面
-require 'db_connect.php'; // 你的数据库连接
+session_start();
+require 'db_connect.php'; // connect database
 
-// --- 新加的安检门 ---
-// 如果用户已经有 ID 了（说明已登录），直接送去 Dashboard
+// after login will send user to dashboard.php
 if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
     exit();
 }
-// -------------------
 
-// ... 下面才是原本的登录/注册逻辑 ...
-// 引入数据库连接
 require 'db_connect.php';
 
 $error_msg = "";
 $success_msg = "";
 
-// 只有当用户点击 "Register" 提交表单时，才会执行下面的代码
+// only process when register form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fullname = $_POST['fullname'];
     $email = $_POST['email'];
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    // 1. 后端简单验证
+    // backend validation
     if ($password !== $confirm_password) {
         $error_msg = "Passwords do not match!";
     } else {
-        // 2. 检查邮箱是否已被注册
+        // check if email already registered
         $check_sql = "SELECT id FROM users WHERE email = '$email'";
         $result = mysqli_query($conn, $check_sql);
 
         if (mysqli_num_rows($result) > 0) {
             $error_msg = "Email is already registered!";
         } else {
-            // 3. 密码加密 (非常重要！永远不要存明文密码)
+            // protect password by hashing
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-            // 4. 插入数据库
+            // store to database
             $sql = "INSERT INTO users (fullname, email, password) VALUES ('$fullname', '$email', '$hashed_password')";
 
             if (mysqli_query($conn, $sql)) {
-                // 注册成功，跳转到登录页
+                // registration successful, redirect to login page
                 echo "<script>alert('Registration Successful! Please Login.'); window.location.href='login.php';</script>";
                 exit();
             } else {

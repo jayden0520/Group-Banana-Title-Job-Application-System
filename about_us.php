@@ -1,5 +1,4 @@
 <?php
-// 1. 开启 Session (必须在第一行)
 session_start();
 ?>
 <!DOCTYPE html>
